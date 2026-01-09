@@ -26,6 +26,16 @@ type IndexStats struct {
 	Duration      time.Duration
 }
 
+// ProgressInfo contains progress information for indexing
+type ProgressInfo struct {
+	Current     int    // Current file number (1-indexed)
+	Total       int    // Total number of files
+	CurrentFile string // Path of current file being processed
+}
+
+// ProgressCallback is called for each file during indexing
+type ProgressCallback func(info ProgressInfo)
+
 func NewIndexer(
 	root string,
 	st store.VectorStore,
@@ -42,8 +52,13 @@ func NewIndexer(
 	}
 }
 
-// IndexAll performs a full index of the project
+// IndexAll performs a full index of the project (no progress reporting)
 func (idx *Indexer) IndexAll(ctx context.Context) (*IndexStats, error) {
+	return idx.IndexAllWithProgress(ctx, nil)
+}
+
+// IndexAllWithProgress performs a full index with progress reporting
+func (idx *Indexer) IndexAllWithProgress(ctx context.Context, onProgress ProgressCallback) (*IndexStats, error) {
 	start := time.Now()
 	stats := &IndexStats{}
 
@@ -53,10 +68,6 @@ func (idx *Indexer) IndexAll(ctx context.Context) (*IndexStats, error) {
 		return nil, fmt.Errorf("failed to scan files: %w", err)
 	}
 	stats.FilesSkipped = len(skipped)
-
-	for _, skip := range skipped {
-		log.Printf("Skipped: %s", skip)
-	}
 
 	// Get existing documents
 	existingDocs, err := idx.store.ListDocuments(ctx)
@@ -69,8 +80,19 @@ func (idx *Indexer) IndexAll(ctx context.Context) (*IndexStats, error) {
 		existingMap[doc] = true
 	}
 
+	total := len(files)
+
 	// Index new/modified files
-	for _, file := range files {
+	for i, file := range files {
+		// Report progress
+		if onProgress != nil {
+			onProgress(ProgressInfo{
+				Current:     i + 1,
+				Total:       total,
+				CurrentFile: file.Path,
+			})
+		}
+
 		// Check if file needs reindexing
 		doc, err := idx.store.GetDocument(ctx, file.Path)
 		if err != nil {

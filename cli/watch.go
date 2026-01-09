@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -118,9 +119,13 @@ func runWatch(cmd *cobra.Command, args []string) error {
 	// Initialize indexer
 	idx := indexer.NewIndexer(projectRoot, st, emb, chunker, scanner)
 
-	// Initial scan
+	// Initial scan with progress
 	fmt.Println("\nPerforming initial scan...")
-	stats, err := idx.IndexAll(ctx)
+	stats, err := idx.IndexAllWithProgress(ctx, func(info indexer.ProgressInfo) {
+		printProgress(info.Current, info.Total, info.CurrentFile)
+	})
+	// Clear progress line
+	fmt.Print("\r" + strings.Repeat(" ", 80) + "\r")
 	if err != nil {
 		return fmt.Errorf("initial indexing failed: %w", err)
 	}
@@ -199,4 +204,29 @@ func handleFileEvent(ctx context.Context, idx *indexer.Indexer, scanner *indexer
 		}
 		log.Printf("Removed %s from index", event.Path)
 	}
+}
+
+// printProgress displays a progress bar for indexing
+func printProgress(current, total int, filePath string) {
+	if total == 0 {
+		return
+	}
+
+	// Calculate percentage
+	percent := float64(current) / float64(total) * 100
+
+	// Build progress bar (20 chars width)
+	barWidth := 20
+	filled := int(float64(barWidth) * float64(current) / float64(total))
+	bar := strings.Repeat("█", filled) + strings.Repeat("░", barWidth-filled)
+
+	// Truncate file path if too long
+	maxPathLen := 35
+	displayPath := filePath
+	if len(filePath) > maxPathLen {
+		displayPath = "..." + filePath[len(filePath)-maxPathLen+3:]
+	}
+
+	// Print with carriage return to overwrite previous line
+	fmt.Printf("\rIndexing [%s] %3.0f%% (%d/%d) %s", bar, percent, current, total, displayPath)
 }
