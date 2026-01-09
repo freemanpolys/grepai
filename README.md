@@ -1,7 +1,6 @@
 # grepai
 
 [![Go](https://github.com/yoanbernabeu/grepai/actions/workflows/ci.yml/badge.svg)](https://github.com/yoanbernabeu/grepai/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/yoanbernabeu/grepai/branch/main/graph/badge.svg)](https://codecov.io/gh/yoanbernabeu/grepai)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yoanbernabeu/grepai)](https://goreportcard.com/report/github.com/yoanbernabeu/grepai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
