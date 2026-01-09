@@ -20,7 +20,29 @@ type Config struct {
 	Store    StoreConfig    `yaml:"store"`
 	Chunking ChunkingConfig `yaml:"chunking"`
 	Watch    WatchConfig    `yaml:"watch"`
+	Search   SearchConfig   `yaml:"search"`
 	Ignore   []string       `yaml:"ignore"`
+}
+
+type SearchConfig struct {
+	Boost  BoostConfig  `yaml:"boost"`
+	Hybrid HybridConfig `yaml:"hybrid"`
+}
+
+type HybridConfig struct {
+	Enabled bool    `yaml:"enabled"`
+	K       float32 `yaml:"k"` // RRF constant (default: 60)
+}
+
+type BoostConfig struct {
+	Enabled   bool          `yaml:"enabled"`
+	Penalties []BoostRule   `yaml:"penalties"`
+	Bonuses   []BoostRule   `yaml:"bonuses"`
+}
+
+type BoostRule struct {
+	Pattern string  `yaml:"pattern"`
+	Factor  float32 `yaml:"factor"`
 }
 
 type EmbedderConfig struct {
@@ -65,6 +87,45 @@ func DefaultConfig() *Config {
 		},
 		Watch: WatchConfig{
 			DebounceMs: 500,
+		},
+		Search: SearchConfig{
+			Hybrid: HybridConfig{
+				Enabled: false,
+				K:       60,
+			},
+			Boost: BoostConfig{
+				Enabled: true,
+				Penalties: []BoostRule{
+					// Test files (multi-language)
+					{Pattern: "/tests/", Factor: 0.5},
+					{Pattern: "/test/", Factor: 0.5},
+					{Pattern: "__tests__", Factor: 0.5},
+					{Pattern: "_test.", Factor: 0.5},
+					{Pattern: ".test.", Factor: 0.5},
+					{Pattern: ".spec.", Factor: 0.5},
+					{Pattern: "test_", Factor: 0.5},
+					// Mocks
+					{Pattern: "/mocks/", Factor: 0.4},
+					{Pattern: "/mock/", Factor: 0.4},
+					{Pattern: ".mock.", Factor: 0.4},
+					// Fixtures & test data
+					{Pattern: "/fixtures/", Factor: 0.4},
+					{Pattern: "/testdata/", Factor: 0.4},
+					// Generated code
+					{Pattern: "/generated/", Factor: 0.4},
+					{Pattern: ".generated.", Factor: 0.4},
+					{Pattern: ".gen.", Factor: 0.4},
+					// Documentation
+					{Pattern: ".md", Factor: 0.6},
+					{Pattern: "/docs/", Factor: 0.6},
+				},
+				Bonuses: []BoostRule{
+					// Entry points (multi-language)
+					{Pattern: "/src/", Factor: 1.1},
+					{Pattern: "/lib/", Factor: 1.1},
+					{Pattern: "/app/", Factor: 1.1},
+				},
+			},
 		},
 		Ignore: []string{
 			".git",

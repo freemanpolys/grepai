@@ -86,4 +86,7 @@ type VectorStore interface {
 
 	// GetChunksForFile returns all chunks for a specific file
 	GetChunksForFile(ctx context.Context, filePath string) ([]Chunk, error)
+
+	// GetAllChunks returns all chunks in the store (used for text search)
+	GetAllChunks(ctx context.Context) ([]Chunk, error)
 }

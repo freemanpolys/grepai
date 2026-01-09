@@ -24,6 +24,8 @@ export default defineConfig({
           label: 'Configuration',
           items: [
             { label: 'Config File', link: '/configuration/' },
+            { label: 'Search Boost', link: '/search-boost/' },
+            { label: 'Hybrid Search', link: '/hybrid-search/' },
           ],
         },
         {

@@ -80,7 +80,38 @@ store:
 chunking:
   size: 512
   overlap: 50
+search:
+  boost:
+    enabled: true           # Structural boosting for better relevance
 ```
+
+### Search Boost (enabled by default)
+
+grepai automatically adjusts search scores based on file paths. Patterns are language-agnostic:
+
+| Category | Patterns | Factor |
+|----------|----------|--------|
+| Tests | `/tests/`, `/test/`, `__tests__`, `_test.`, `.test.`, `.spec.` | ×0.5 |
+| Mocks | `/mocks/`, `/mock/`, `.mock.` | ×0.4 |
+| Fixtures | `/fixtures/`, `/testdata/` | ×0.4 |
+| Generated | `/generated/`, `.generated.`, `.gen.` | ×0.4 |
+| Docs | `.md`, `/docs/` | ×0.6 |
+| Source | `/src/`, `/lib/`, `/app/` | ×1.1 |
+
+Customize or disable in `.grepai/config.yaml`. See [documentation](https://yoanbernabeu.github.io/grepai/configuration/) for details.
+
+### Hybrid Search (optional)
+
+Enable hybrid search to combine vector similarity with text matching:
+
+```yaml
+search:
+  hybrid:
+    enabled: true
+    k: 60
+```
+
+Uses [Reciprocal Rank Fusion](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf) to merge results. Useful when queries contain exact identifiers.
 
 ### Embedding Providers
 

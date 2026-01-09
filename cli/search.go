@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/yoanbernabeu/grepai/config"
 	"github.com/yoanbernabeu/grepai/embedder"
+	"github.com/yoanbernabeu/grepai/search"
 	"github.com/yoanbernabeu/grepai/store"
 )
 
@@ -92,14 +93,11 @@ func runSearch(cmd *cobra.Command, args []string) error {
 	}
 	defer st.Close()
 
-	// Embed query
-	queryVector, err := emb.Embed(ctx, query)
-	if err != nil {
-		return fmt.Errorf("failed to embed query: %w", err)
-	}
+	// Create searcher with boost config
+	searcher := search.NewSearcher(st, emb, cfg.Search)
 
-	// Search
-	results, err := st.Search(ctx, queryVector, searchLimit)
+	// Search with boosting
+	results, err := searcher.Search(ctx, query, searchLimit)
 	if err != nil {
 		return fmt.Errorf("search failed: %w", err)
 	}
@@ -185,12 +183,10 @@ func SearchJSON(projectRoot string, query string, limit int) ([]store.SearchResu
 	}
 	defer st.Close()
 
-	queryVector, err := emb.Embed(ctx, query)
-	if err != nil {
-		return nil, err
-	}
+	// Create searcher with boost config
+	searcher := search.NewSearcher(st, emb, cfg.Search)
 
-	return st.Search(ctx, queryVector, limit)
+	return searcher.Search(ctx, query, limit)
 }
 
 func init() {

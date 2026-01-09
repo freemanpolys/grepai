@@ -136,6 +136,41 @@ chunking:
 - **Smaller chunks**: More precise matches, more results, faster
 - **More overlap**: Better continuity, larger index
 
+## Search Options
+
+grepai provides two optional search enhancements:
+
+### Search Boost (enabled by default)
+
+Adjusts scores based on file paths. Test files are penalized, source directories are boosted.
+
+```yaml
+search:
+  boost:
+    enabled: true
+    penalties:
+      - pattern: "_test."
+        factor: 0.5
+    bonuses:
+      - pattern: "/src/"
+        factor: 1.1
+```
+
+See [Search Boost](/grepai/search-boost/) for full documentation.
+
+### Hybrid Search (disabled by default)
+
+Combines vector similarity with text matching using RRF.
+
+```yaml
+search:
+  hybrid:
+    enabled: true
+    k: 60
+```
+
+See [Hybrid Search](/grepai/hybrid-search/) for full documentation.
+
 ## Environment Variables
 
 You can use environment variables in config:

@@ -247,6 +247,17 @@ func (s *GOBStore) GetChunksForFile(ctx context.Context, filePath string) ([]Chu
 	return chunks, nil
 }
 
+func (s *GOBStore) GetAllChunks(ctx context.Context) ([]Chunk, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	chunks := make([]Chunk, 0, len(s.chunks))
+	for _, chunk := range s.chunks {
+		chunks = append(chunks, chunk)
+	}
+	return chunks, nil
+}
+
 // cosineSimilarity calculates the cosine similarity between two vectors
 func cosineSimilarity(a, b []float32) float32 {
 	if len(a) != len(b) {

@@ -313,3 +313,26 @@ func (s *PostgresStore) GetChunksForFile(ctx context.Context, filePath string) (
 
 	return chunks, rows.Err()
 }
+
+func (s *PostgresStore) GetAllChunks(ctx context.Context) ([]Chunk, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT id, file_path, start_line, end_line, content, hash, updated_at
+		FROM chunks WHERE project_id = $1`,
+		s.projectID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all chunks: %w", err)
+	}
+	defer rows.Close()
+
+	var chunks []Chunk
+	for rows.Next() {
+		var c Chunk
+		if err := rows.Scan(&c.ID, &c.FilePath, &c.StartLine, &c.EndLine, &c.Content, &c.Hash, &c.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan chunk: %w", err)
+		}
+		chunks = append(chunks, c)
+	}
+
+	return chunks, rows.Err()
+}

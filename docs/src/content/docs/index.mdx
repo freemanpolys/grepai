@@ -141,6 +141,39 @@ import { Card, CardGrid, LinkCard, Steps, Tabs, TabItem, Badge } from '@astrojs/
 
 ---
 
+## Tune your search
+
+<CardGrid>
+  <Card title="Search Boost" icon="star">
+    <Badge text="Enabled by default" variant="success" size="small" />
+
+    Automatically penalizes test files, mocks, and docs. Boosts source directories.
+
+    ```yaml
+    search:
+      boost:
+        enabled: true
+    ```
+
+    <a href="/grepai/search-boost/">Learn more →</a>
+  </Card>
+  <Card title="Hybrid Search" icon="random">
+    <Badge text="Optional" variant="note" size="small" />
+
+    Combines vector similarity with text matching (RRF). Better for exact identifiers.
+
+    ```yaml
+    search:
+      hybrid:
+        enabled: true
+    ```
+
+    <a href="/grepai/hybrid-search/">Learn more →</a>
+  </Card>
+</CardGrid>
+
+---
+
 ## Ready to dive deeper?
 
 <CardGrid>
@@ -151,8 +184,13 @@ import { Card, CardGrid, LinkCard, Steps, Tabs, TabItem, Badge } from '@astrojs/
   />
   <LinkCard
     title="Configuration"
-    description="Customize chunking, backends, and more."
+    description="Customize chunking, backends, and search options."
     href="/grepai/configuration/"
+  />
+  <LinkCard
+    title="Search Options"
+    description="Boost relevance and enable hybrid search."
+    href="/grepai/search-boost/"
   />
   <LinkCard
     title="AI Agent Setup"
